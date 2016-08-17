@@ -1,0 +1,10 @@
+name: ThaneBukkit
+main: org.thane.ThaneBukkit
+version: 0.1
+author: GreatThane
+commands:
+   sethunger:
+      description: Sets hunger of targeted player.
+      usage: /sethunger <player> <value>
+      permission: ThaneBukkit.sethunger
+      permission-message: You don't have <permission>
