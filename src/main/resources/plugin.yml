@@ -5,6 +5,6 @@ author: GreatThane
 commands:
    sethunger:
       description: Sets hunger of targeted player.
-      usage: /sethunger <player> <value>
+      usage: §c/sethunger <player> <value>
       permission: ThaneBukkit.sethunger
       permission-message: You don't have <permission>

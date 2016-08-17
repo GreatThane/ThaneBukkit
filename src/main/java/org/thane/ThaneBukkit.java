@@ -35,7 +35,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
             // Validation
 
             if (args.length != 2) {
-                sender.sendMessage("Uh oh, I don't understand what you want!");
+                sender.sendMessage("§cUh oh, I don't understand what you want!");
                 return false;
             }
 
@@ -45,11 +45,11 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
             try {
                 hungerValue = Integer.parseInt(args[1]);
                 if (hungerValue < 0 || hungerValue > 20) {
-                    sender.sendMessage("Oops, hunger value should be between 0 and 20");
+                    sender.sendMessage("§cOops, hunger value should be between 0 and 20");
                     return false;
                 }
             } catch (NumberFormatException ex) {
-                sender.sendMessage("Looks like your second parameter was not an integer!");
+                sender.sendMessage("§cLooks like your second parameter was not an integer!");
                 return false;
             }
 
@@ -57,12 +57,12 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
                 if (player.getName().equalsIgnoreCase(userName)) {
                     player.setFoodLevel(hungerValue);
                     player.getWorld().setDifficulty(Difficulty.EASY);
-                    sender.sendMessage(userName + "hunger set to " + hungerValue);
+                    sender.sendMessage("§a" + userName + " hunger set to " + hungerValue);
                     return true;
                 }
             }
 
-            sender.sendMessage("Unable to find any players online named " + userName);
+            sender.sendMessage("§cUnable to find any players online named " + userName);
 
         }
         return false;
