@@ -5,6 +5,7 @@ package org.thane;
  */
 
 import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -55,6 +56,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
             for (Player player: Bukkit.getOnlinePlayers()) {
                 if (player.getName().equalsIgnoreCase(userName)) {
                     player.setFoodLevel(hungerValue);
+                    player.getWorld().setDifficulty(Difficulty.EASY);
                     sender.sendMessage(userName + "hunger set to " + hungerValue);
                     return true;
                 }
@@ -69,7 +71,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onFoodLevelChange(final FoodLevelChangeEvent event) {
         //This stops food level from changing due to exhaustion and eating
-        //HOWEVER. it doesn't stop food level from increasing due to saturation.  Run difficulty 1 or more.
+        //HOWEVER. it doesn't stop food level from increasing due to saturation.  Run difficulty EASY or more.
         event.setCancelled(true);
     }
 
