@@ -61,7 +61,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
                 return false;
             }
 
-            Player player = getOnlinePlayer(userName);
+            Player player = Utils.getOnlinePlayer(userName);
             if (player == null) {
                 sender.sendMessage("§cUnable to find any players online named " + userName);
                 return false;
@@ -85,7 +85,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
             String userName = args[0];
             String action = args[1];
 
-            Player player = getOnlinePlayer(userName);
+            Player player = Utils.getOnlinePlayer(userName);
             if(player == null) {
                 sender.sendMessage("§cUnable to find any players online named " + userName);
                 return false;
@@ -101,7 +101,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
 
                     //add new timer for this player
                     Timer timer = new Timer();
-                    sendTitle(sender, player, "§6GO!");
+                    Utils.sendTitle(sender, player, "§6GO!");
                     timer.scheduleAtFixedRate(new Task(player, sender), 1000, 1000);
                     PlayerTimer playerTimer = new PlayerTimer(sender, player, 0, timer);
                     playerTimers.put(player.getName(), playerTimer);
@@ -117,7 +117,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
                     PlayerTimer playerToStop = playerTimers.get(player.getName());
                     Timer timerToStop = playerToStop.getTimer();
                     timerToStop.cancel();
-                    sendTitle(sender, player, "§aTotal Time §2" + formatTime(playerToStop.getSeconds()), "");
+                    Utils.sendTitle(sender, player, "§aTotal Time §2" + Utils.formatTime(playerToStop.getSeconds()), "");
                     playerTimers.remove(player.getName());
                     return true;
                 default:
@@ -155,7 +155,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
 
             if (player.isOnline() && playerTimer.getSeconds() < 3599) {
                 playerTimer.incrementSeconds();
-                sendTitle(sender, player, "", "§a" + formatTime(playerTimer.getSeconds()));
+                Utils.sendTitle(sender, player, "", "§a" + Utils.formatTime(playerTimer.getSeconds()));
             } else {
                 this.cancel();
                 playerTimers.remove(player.getName());
@@ -163,34 +163,5 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
         }
     }
 
-    private void sendTitle(CommandSender sender, Player player, String title) {
 
-        sendTitle(sender, player, title, null);
-    }
-
-    private void sendTitle(CommandSender sender, Player player, String title, String subTitle) {
-
-        if (subTitle != null) {
-            player.getServer().dispatchCommand(sender, "title " + player.getName() + " subtitle {\"text\":\"" + subTitle + "\"}");
-        }
-        player.getServer().dispatchCommand(sender, "title " + player.getName() + " title {\"text\":\"" + title + "\"}");
-    }
-
-    private Player getOnlinePlayer(String userName) {
-
-        for (Player player: Bukkit.getOnlinePlayers()) {
-            if (player.getName().equalsIgnoreCase(userName)) {
-                return player;
-            }
-        }
-        return null;
-    }
-
-    private String formatTime (int seconds) {
-
-        int minutes = seconds / 60;
-        int remainderSeconds = seconds - (minutes * 60);
-        String prettySeconds = remainderSeconds < 10 ? "0".concat(String.valueOf(remainderSeconds)) : String.valueOf(remainderSeconds);
-        return minutes + ":" + prettySeconds;
-    }
 }
