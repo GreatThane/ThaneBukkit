@@ -190,7 +190,6 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
 
         int minutes = seconds / 60;
         int remainderSeconds = seconds - (minutes * 60);
-        String prettySeconds = remainderSeconds < 10 ? "0".concat(String.valueOf(remainderSeconds)) : String.valueOf(remainderSeconds);
-        return minutes + ":" + prettySeconds;
+        return String.format("%1d:%2$02d", minutes, remainderSeconds);
     }
 }
