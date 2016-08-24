@@ -6,7 +6,8 @@ package org.thane;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
-import org.bukkit.block.CommandBlock;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,7 +17,14 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.Listener;
 
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class ThaneBukkit extends JavaPlugin implements Listener {
+
+    private static HashMap<String, PlayerTimer> playerTimers = new HashMap<String, PlayerTimer>();
+
     @Override
     public void onEnable() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
@@ -53,17 +61,69 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
                 return false;
             }
 
-            for (Player player: Bukkit.getOnlinePlayers()) {
-                if (player.getName().equalsIgnoreCase(userName)) {
-                    player.setFoodLevel(hungerValue);
-                    player.getWorld().setDifficulty(Difficulty.EASY);
-                    sender.sendMessage("§a" + userName + " hunger set to " + hungerValue);
-                    return true;
-                }
+            Player player = getOnlinePlayer(userName);
+            if (player == null) {
+                sender.sendMessage("§cUnable to find any players online named " + userName);
+                return false;
             }
 
-            sender.sendMessage("§cUnable to find any players online named " + userName);
+            player.setFoodLevel(hungerValue);
+            player.getWorld().setDifficulty(Difficulty.EASY);
+            sender.sendMessage("§a" + userName + " hunger set to " + hungerValue);
 
+            return true;
+        }
+        else if (command.getName().equalsIgnoreCase("timer")) {
+
+            //validation
+
+            if (args.length != 2) {
+                sender.sendMessage("Wrong number of parameters");
+                return false;
+            }
+
+            String userName = args[0];
+            String action = args[1];
+
+            Player player = getOnlinePlayer(userName);
+            if(player == null) {
+                sender.sendMessage("§cUnable to find any players online named " + userName);
+                return false;
+            }
+
+            switch (action.toLowerCase()) {
+                case "start":
+                    //make sure player doesn't already have a running timer
+                    if (playerTimers.containsKey(player.getName())) {
+                        sender.sendMessage(player.getName() + " already has a timer running!");
+                        return false;
+                    }
+
+                    //add new timer for this player
+                    Timer timer = new Timer();
+                    sendTitle(sender, player, "§6GO!");
+                    timer.scheduleAtFixedRate(new Task(player, sender), 1000, 1000);
+                    PlayerTimer playerTimer = new PlayerTimer(sender, player, 0, timer);
+                    playerTimers.put(player.getName(), playerTimer);
+                    return true;
+                case "stop":
+                    //find the right timer!
+                    if(!playerTimers.containsKey(player.getName())) {
+                        sender.sendMessage("No timer running for " + player.getName());
+                        return false;
+                    }
+
+                    //Stop the timer!
+                    PlayerTimer playerToStop = playerTimers.get(player.getName());
+                    Timer timerToStop = playerToStop.getTimer();
+                    timerToStop.cancel();
+                    sendTitle(sender, player, "§aTotal Time §2" + formatTime(playerToStop.getSeconds()), "");
+                    playerTimers.remove(player.getName());
+                    return true;
+                default:
+                    sender.sendMessage("Not a timer option!");
+                    break;
+            }
         }
         return false;
     }
@@ -75,4 +135,62 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
         event.setCancelled(true);
     }
 
+    private class Task extends TimerTask {
+
+        private Player player;
+        private CommandSender sender;
+
+        public Task(Player player, CommandSender sender) {
+            this.player = player;
+            this.sender = sender;
+        }
+
+        @Override
+        public void run() {
+            if(!playerTimers.containsKey(player.getName())) {
+                this.cancel();
+                return;
+            }
+            PlayerTimer playerTimer = playerTimers.get(player.getName());
+
+            if (player.isOnline() && playerTimer.getSeconds() < 3599) {
+                playerTimer.incrementSeconds();
+                sendTitle(sender, player, "", "§a" + formatTime(playerTimer.getSeconds()));
+            } else {
+                this.cancel();
+                playerTimers.remove(player.getName());
+            }
+        }
+    }
+
+    private void sendTitle(CommandSender sender, Player player, String title) {
+
+        sendTitle(sender, player, title, null);
+    }
+
+    private void sendTitle(CommandSender sender, Player player, String title, String subTitle) {
+
+        if (subTitle != null) {
+            player.getServer().dispatchCommand(sender, "title " + player.getName() + " subtitle {\"text\":\"" + subTitle + "\"}");
+        }
+        player.getServer().dispatchCommand(sender, "title " + player.getName() + " title {\"text\":\"" + title + "\"}");
+    }
+
+    private Player getOnlinePlayer(String userName) {
+
+        for (Player player: Bukkit.getOnlinePlayers()) {
+            if (player.getName().equalsIgnoreCase(userName)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    private String formatTime (int seconds) {
+
+        int minutes = seconds / 60;
+        int remainderSeconds = seconds - (minutes * 60);
+        String prettySeconds = remainderSeconds < 10 ? "0".concat(String.valueOf(remainderSeconds)) : String.valueOf(remainderSeconds);
+        return minutes + ":" + prettySeconds;
+    }
 }

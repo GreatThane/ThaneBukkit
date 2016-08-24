@@ -8,3 +8,8 @@ commands:
       usage: §c/sethunger <player> <value>
       permission: ThaneBukkit.sethunger
       permission-message: You don't have <permission>
+   timer:
+      description: A minute and second timer.
+      usage: §c/timer <player> <start|stop>
+      permission: ThaneBukkit.timer
+      permisssion-message: You don't have <permission>
