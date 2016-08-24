@@ -14,10 +14,10 @@ public class UtilsTest {
     public void testFormatTime() throws Exception {
 
         //verify that we're not rounding minutes up when seconds are over 30
-        assertEquals(Utils.formatTime(99), "1:39");
+        assertEquals("1:39", Utils.formatTime(99));
 
         //Make sure we're padding seconds properly
-        assertEquals(Utils.formatTime(1), "0:01");
+        assertEquals("0:01", Utils.formatTime(1));
 
     }
 

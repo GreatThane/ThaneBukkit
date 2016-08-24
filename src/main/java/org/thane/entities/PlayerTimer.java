@@ -1,4 +1,4 @@
-package org.thane;
+package org.thane.entities;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
