@@ -1,7 +1,12 @@
 package org.thane.command;
 
+import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.thane.entities.PlayerTimer;
 import org.thane.Utils;
 
@@ -9,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static org.bukkit.Material.WALL_SIGN;
 
 /**
  * Created by ep9630 on 8/24/16.
@@ -20,7 +27,7 @@ public class ThaneTimer {
     public boolean handleCommand(CommandSender sender, String[] args) {
 
         //validation
-        if (args.length != 2) {
+        if (!(args.length == 2 || args.length == 4)) {
             sender.sendMessage("Wrong number of parameters");
             return false;
         }
@@ -33,7 +40,6 @@ public class ThaneTimer {
             sender.sendMessage("§cUnable to find any players online named " + userName);
             return false;
         }
-
         switch (action.toLowerCase()) {
             case "start":
                 //make sure player doesn't already have a running timer
@@ -61,6 +67,40 @@ public class ThaneTimer {
                 Timer timerToStop = playerToStop.getTimer();
                 timerToStop.cancel();
                 Utils.sendTitle(sender, player, "§aTotal Time §2" + Utils.formatTime(playerToStop.getSeconds()), "");
+                if (args.length == 4) {
+                    String gameName = args[2];
+                    String signLocation = args[3];
+                    String[] signLocations = signLocation.split(",");
+                    int signX = Integer.parseInt(signLocations[0]);
+                    int signY = Integer.parseInt(signLocations[1]);
+                    int signZ = Integer.parseInt(signLocations[2]);
+                    Block block = player.getWorld().getBlockAt(signX, signY, signZ);
+                    Bukkit.getServer().getLogger().info("Block is a " + block.getType().toString());
+                    if(block.getType().equals(WALL_SIGN)) {
+                        Bukkit.getServer().getLogger().info("I Matched a WALL_SIGN");
+                        org.bukkit.material.Sign signData = (org.bukkit.material.Sign)block.getState().getData();
+                        BlockFace face = signData.getAttachedFace();
+                        for(int i=0; i <= 4; i++) {
+                            int thisSignX = signX;
+                            int thisSignZ = signZ;
+                            Bukkit.getServer().getLogger().info("Facing " + face.toString());
+                            if(face.equals(BlockFace.NORTH)) {
+                                thisSignX = thisSignX + i;
+                            } else if (face.equals(BlockFace.SOUTH)) {
+                                thisSignX = thisSignX - i;
+                            } else if (face.equals(BlockFace.EAST)) {
+                                thisSignZ = thisSignZ + i;
+                            } else if (face.equals(BlockFace.WEST)) {
+                                thisSignZ = thisSignZ - i;
+                            }
+                            Block myBlock = player.getWorld().getBlockAt(thisSignX, signY, thisSignZ);
+                            Sign sign = (Sign)myBlock.getState();
+                            sign.setLine(0, "Hello Sign " + i);
+                            sign.update();
+                        }
+                    }
+
+                }
                 playerTimers.remove(player.getName());
                 return true;
             default:
