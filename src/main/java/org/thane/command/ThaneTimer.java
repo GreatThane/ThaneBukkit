@@ -10,15 +10,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.thane.entities.PlayerTimer;
 import org.thane.Utils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.io.*;
+import java.util.*;
 
 import static org.bukkit.Material.WALL_SIGN;
 
 /**
- * Created by ep9630 on 8/24/16.
+ * Created by GreatThane on 8/24/16.
  */
 public class ThaneTimer {
 
@@ -69,21 +67,51 @@ public class ThaneTimer {
                 Utils.sendTitle(sender, player, "§aTotal Time §2" + Utils.formatTime(playerToStop.getSeconds()), "");
                 if (args.length == 4) {
                     String gameName = args[2];
+                    Map<String, Integer> highScores;
+                    try {
+                        File gameScoreFile = new File(Bukkit.getServer().getWorldContainer().getPath() + "/plugins/ThaneBukkit/highscores/" + gameName + ".dat");
+                        gameScoreFile.getParentFile().mkdirs();
+                        if(gameScoreFile.exists()) {
+                            FileInputStream inputStream = new FileInputStream(gameScoreFile);
+                            ObjectInputStream objectStream = new ObjectInputStream(inputStream);
+                            highScores = (LinkedHashMap<String, Integer>) objectStream.readObject();
+                            objectStream.close();
+                            inputStream.close();
+                        } else {
+                            highScores = new LinkedHashMap<String, Integer>();
+                        }
+                        if(!highScores.containsKey(player.getName()) || playerToStop.getSeconds() < highScores.get(player.getName())) {
+                            highScores.put(player.getName(), playerToStop.getSeconds());
+                            highScores = Utils.sortByValue(highScores);
+                            FileOutputStream outputStream = new FileOutputStream(gameScoreFile);
+                            ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
+                            objectStream.writeObject(highScores);
+                            objectStream.close();
+                            outputStream.close();
+                        }
+                    } catch (Exception e) {
+                        Bukkit.getServer().getLogger().severe("Unable to save game high score file: " + e.getMessage());
+                        sender.sendMessage("Error working with high score file, see log for more info");
+                        return false;
+                    }
+
                     String signLocation = args[3];
                     String[] signLocations = signLocation.split(",");
                     int signX = Integer.parseInt(signLocations[0]);
                     int signY = Integer.parseInt(signLocations[1]);
                     int signZ = Integer.parseInt(signLocations[2]);
                     Block block = player.getWorld().getBlockAt(signX, signY, signZ);
-                    Bukkit.getServer().getLogger().info("Block is a " + block.getType().toString());
+//                    Bukkit.getServer().getLogger().info("Block is a " + block.getType().toString());
                     if(block.getType().equals(WALL_SIGN)) {
-                        Bukkit.getServer().getLogger().info("I Matched a WALL_SIGN");
+//                        Bukkit.getServer().getLogger().info("I Matched a WALL_SIGN");
                         org.bukkit.material.Sign signData = (org.bukkit.material.Sign)block.getState().getData();
                         BlockFace face = signData.getAttachedFace();
+                        String[] highScoreNames = highScores.keySet().toArray(new String[0]);
+                        Integer[] highScoreValues = highScores.values().toArray(new Integer[0]);
                         for(int i=0; i <= 4; i++) {
                             int thisSignX = signX;
                             int thisSignZ = signZ;
-                            Bukkit.getServer().getLogger().info("Facing " + face.toString());
+//                            Bukkit.getServer().getLogger().info("Facing " + face.toString());
                             if(face.equals(BlockFace.NORTH)) {
                                 thisSignX = thisSignX + i;
                             } else if (face.equals(BlockFace.SOUTH)) {
@@ -95,7 +123,32 @@ public class ThaneTimer {
                             }
                             Block myBlock = player.getWorld().getBlockAt(thisSignX, signY, thisSignZ);
                             Sign sign = (Sign)myBlock.getState();
-                            sign.setLine(0, "Hello Sign " + i);
+                            String placeColor;
+                            switch (i + 1) {
+                                case 1:
+                                    placeColor = "§e";
+                                    break;
+                                case 2:
+                                    placeColor = "§8";
+                                    break;
+                                case 3:
+                                    placeColor = "§9";
+                                    break;
+                                default:
+                                    placeColor = "§0";
+                                    break;
+                            }
+                            if(i < highScoreNames.length) {
+                                sign.setLine(0, placeColor + "#" + (i + 1));
+                                sign.setLine(1, "§9" + highScoreNames[i]);
+                                sign.setLine(2, "§5" + Utils.formatTime(highScoreValues[i]));
+                            }
+                            else
+                            {
+                                sign.setLine(0, "");
+                                sign.setLine(1, "");
+                                sign.setLine(2, "");
+                            }
                             sign.update();
                         }
                     }

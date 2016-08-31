@@ -4,8 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.*;
+
 /**
- * Created by jprice on 8/24/16.
+ * Created by GreatThane on 8/24/16.
  */
 public class Utils {
 
@@ -37,5 +39,26 @@ public class Utils {
         int minutes = seconds / 60;
         int remainderSeconds = seconds - (minutes * 60);
         return String.format("%1d:%2$02d", minutes, remainderSeconds);
+    }
+
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map )
+    {
+        List<Map.Entry<K, V>> list =
+                new LinkedList<>( map.entrySet() );
+        Collections.sort( list, new Comparator<Map.Entry<K, V>>()
+        {
+            @Override
+            public int compare( Map.Entry<K, V> o1, Map.Entry<K, V> o2 )
+            {
+                return ( o1.getValue() ).compareTo( o2.getValue() );
+            }
+        } );
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list)
+        {
+            result.put( entry.getKey(), entry.getValue() );
+        }
+        return result;
     }
 }

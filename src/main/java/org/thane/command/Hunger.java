@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.thane.Utils;
 
 /**
- * Created by ethan on 8/24/16.
+ * Created by GreatThane on 8/24/16.
  */
 public class Hunger extends JavaPlugin implements Listener {
 

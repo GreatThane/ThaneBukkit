@@ -10,6 +10,6 @@ commands:
       permission-message: You don't have <permission>
    timer:
       description: A minute and second timer.
-      usage: §c/timer <player> <start|stop>
+      usage: §c/timer <player> <start|stop> [x,y,z]
       permission: ThaneBukkit.timer
       permisssion-message: You don't have <permission>

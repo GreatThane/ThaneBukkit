@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Created by jprice on 8/24/16.
+ * Created by GreatThane on 8/24/16.
  */
 public class UtilsTest {
     @Test
