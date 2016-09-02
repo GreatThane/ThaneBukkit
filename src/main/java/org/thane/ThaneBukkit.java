@@ -4,11 +4,9 @@ package org.thane;
  * Created by GreatThane on 8/16/16.
  */
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.event.Listener;
 import org.thane.command.Hunger;
 import org.thane.command.ThaneTimer;
 

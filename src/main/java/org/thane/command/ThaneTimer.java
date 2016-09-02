@@ -7,6 +7,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.thane.entities.HighScore;
 import org.thane.entities.PlayerTimer;
 import org.thane.Utils;
 
@@ -67,21 +68,23 @@ public class ThaneTimer {
                 Utils.sendTitle(sender, player, "§aTotal Time §2" + Utils.formatTime(playerToStop.getSeconds()), "");
                 if (args.length == 4) {
                     String gameName = args[2];
-                    Map<String, Integer> highScores;
+                    Map<String, HighScore> highScores;
                     try {
                         File gameScoreFile = new File(Bukkit.getServer().getWorldContainer().getPath() + "/plugins/ThaneBukkit/highscores/" + gameName + ".dat");
                         gameScoreFile.getParentFile().mkdirs();
                         if(gameScoreFile.exists()) {
                             FileInputStream inputStream = new FileInputStream(gameScoreFile);
                             ObjectInputStream objectStream = new ObjectInputStream(inputStream);
-                            highScores = (LinkedHashMap<String, Integer>) objectStream.readObject();
+                            highScores = (LinkedHashMap<String, HighScore>) objectStream.readObject();
                             objectStream.close();
                             inputStream.close();
                         } else {
-                            highScores = new LinkedHashMap<String, Integer>();
+                            highScores = new LinkedHashMap<String, HighScore>();
                         }
-                        if(!highScores.containsKey(player.getName()) || playerToStop.getSeconds() < highScores.get(player.getName())) {
-                            highScores.put(player.getName(), playerToStop.getSeconds());
+                        String UUID = player.getUniqueId().toString();
+                        if(!highScores.containsKey(UUID) || playerToStop.getSeconds() < highScores.get(UUID).getSeconds()) {
+                            HighScore highScore = new HighScore(player.getName(), playerToStop.getSeconds());
+                            highScores.put(UUID, highScore);
                             highScores = Utils.sortByValue(highScores);
                             FileOutputStream outputStream = new FileOutputStream(gameScoreFile);
                             ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
@@ -106,8 +109,7 @@ public class ThaneTimer {
 //                        Bukkit.getServer().getLogger().info("I Matched a WALL_SIGN");
                         org.bukkit.material.Sign signData = (org.bukkit.material.Sign)block.getState().getData();
                         BlockFace face = signData.getAttachedFace();
-                        String[] highScoreNames = highScores.keySet().toArray(new String[0]);
-                        Integer[] highScoreValues = highScores.values().toArray(new Integer[0]);
+                        String[] highScoreUUIDs = highScores.keySet().toArray(new String[0]);
                         for(int i=0; i <= 4; i++) {
                             int thisSignX = signX;
                             int thisSignZ = signZ;
@@ -138,10 +140,11 @@ public class ThaneTimer {
                                     placeColor = "§0";
                                     break;
                             }
-                            if(i < highScoreNames.length) {
+                            if(i < highScoreUUIDs.length) {
+                                HighScore highScore = highScores.get(highScoreUUIDs[i]);
                                 sign.setLine(0, placeColor + "#" + (i + 1));
-                                sign.setLine(1, "§9" + highScoreNames[i]);
-                                sign.setLine(2, "§5" + Utils.formatTime(highScoreValues[i]));
+                                sign.setLine(1, "§9" + highScore.getUserName());
+                                sign.setLine(2, "§5" + Utils.formatTime(highScore.getSeconds()));
                             }
                             else
                             {

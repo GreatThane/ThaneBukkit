@@ -1,8 +1,10 @@
 package org.thane;
 
-import com.avaje.ebean.validation.AssertTrue;
-import org.junit.Assert;
 import org.junit.Test;
+import org.thane.entities.HighScore;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -19,6 +21,27 @@ public class UtilsTest {
         //Make sure we're padding seconds properly
         assertEquals("0:01", Utils.formatTime(1));
 
+    }
+
+    @Test
+    public void testSortByValue() throws Exception {
+
+        //Create some high scores
+        Map<String, HighScore> highScores = new LinkedHashMap<String, HighScore>();
+        highScores.put("UUID2342", new HighScore("myname", 43));
+        highScores.put("UUID2433", new HighScore("yourname", 42));
+        highScores.put("UUID2942", new HighScore("someoneelse", 100));
+        highScores.put("UUID3828", new HighScore("ImBest", 32));
+
+        //Sort them
+        highScores = Utils.sortByValue(highScores);
+
+        //Verify Order
+        HighScore[] values = highScores.values().toArray(new HighScore[0]);
+        assertTrue(values[0].getSeconds() == 32);
+        assertTrue(values[1].getSeconds() == 42);
+        assertTrue(values[2].getSeconds() == 43);
+        assertTrue(values[3].getSeconds() == 100);
     }
 
 }
