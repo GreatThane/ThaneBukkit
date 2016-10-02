@@ -134,7 +134,7 @@ public class ThaneTimer {
                                     placeColor = "§8";
                                     break;
                                 case 3:
-                                    placeColor = "§9";
+                                    placeColor = "§6";
                                     break;
                                 default:
                                     placeColor = "§0";

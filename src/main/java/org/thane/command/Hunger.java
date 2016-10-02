@@ -9,16 +9,17 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.thane.ThaneBukkit;
 import org.thane.Utils;
 
 /**
  * Created by GreatThane on 8/24/16.
  */
-public class Hunger extends JavaPlugin implements Listener {
+public class Hunger implements Listener {
 
-    public boolean handleCommand(CommandSender sender, String[] args) {
+    public boolean handleCommand(CommandSender sender, String[] args, JavaPlugin plugin) {
 
-        Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
         // Validation
 
         if (args.length != 2) {

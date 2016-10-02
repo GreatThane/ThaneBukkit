@@ -13,3 +13,13 @@ commands:
       usage: §c/timer <player> <start|stop> [x,y,z]
       permission: ThaneBukkit.timer
       permisssion-message: You don't have <permission>
+   survivorminer:
+      description: Plugin for the Survivor Miner game.
+      usage: §c/survivorminer <start|stop>
+      permission: ThaneBukkit.survivorminer
+      permission-message: You don't have <permission>
+   animate:
+      description: Command to animte a series of blocks.
+      usage: §c/animate <target x,y,z> <reference x1,y1,z1> < reference x2,y2,z2> <direction> <# of frames> <distance between frames> <fps>
+      permission: ThaneBukkit.animate
+      permission-message: You don't have <permission>
