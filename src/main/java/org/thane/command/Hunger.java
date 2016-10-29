@@ -17,9 +17,8 @@ import org.thane.Utils;
  */
 public class Hunger implements Listener {
 
-    public boolean handleCommand(CommandSender sender, String[] args, JavaPlugin plugin) {
+    public static boolean handleCommand(CommandSender sender, String[] args) {
 
-        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
         // Validation
 
         if (args.length != 2) {

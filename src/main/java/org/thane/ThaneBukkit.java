@@ -7,10 +7,7 @@ package org.thane;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.thane.command.Animation;
-import org.thane.command.Hunger;
-import org.thane.command.ThaneTimer;
-import org.thane.command.Zombies;
+import org.thane.command.*;
 
 public class ThaneBukkit extends JavaPlugin {
 
@@ -19,6 +16,8 @@ public class ThaneBukkit extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("ThaneBukkit has been enabled");
+        this.getServer().getPluginManager().registerEvents(new ArmorStandClick(), this);
+        this.getServer().getPluginManager().registerEvents(new Hunger(), this);
     }
 
     @Override
@@ -30,7 +29,7 @@ public class ThaneBukkit extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("sethunger")) {
 
-           return new Hunger().handleCommand(sender, args, this);
+           return Hunger.handleCommand(sender, args);
         }
         else if (command.getName().equalsIgnoreCase("timer")) {
 
