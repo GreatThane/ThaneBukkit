@@ -4,14 +4,20 @@ package org.thane;
  * Created by GreatThane on 8/16/16.
  */
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.thane.command.*;
 
 public class ThaneBukkit extends JavaPlugin {
 
 
+    public static Plugin plugin() {
+
+        return ThaneBukkit.getPlugin(ThaneBukkit.class);
+    }
 
     @Override
     public void onEnable() {
@@ -43,8 +49,20 @@ public class ThaneBukkit extends JavaPlugin {
 
             return new Animation().handleCommand(sender, args, this);
         }
+        else if (command.getName().equalsIgnoreCase("optool")) {
+            return OpTools.handleCommand(sender, args);
+        }
+        else if (command.getName().equalsIgnoreCase("thanereload")) {
+            Utils.reloadPlugin(sender);
+            return true;
+        }
+        else if (command.getName().equalsIgnoreCase("zombiebuy")) {
+            return ZombieBuy.handleCommand(sender, args);
+        }
         return false;
     }
+
+
 
 
 }

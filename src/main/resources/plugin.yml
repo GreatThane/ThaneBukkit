@@ -1,6 +1,7 @@
 name: ThaneBukkit
 main: org.thane.ThaneBukkit
 version: 0.1
+depend: [WorldGuard]
 author: GreatThane
 commands:
    sethunger:
@@ -22,4 +23,19 @@ commands:
       description: Command to animte a series of blocks.
       usage: §c/animate <target x,y,z> <reference x1,y1,z1> < reference x2,y2,z2> <direction> <# of frames> <distance between frames> <fps>
       permission: ThaneBukkit.animate
+      permission-message: You don't have <permission>
+   optool:
+      description: Developer command
+      usage: §c/optool <currency> <value>
+      permission: ThaneBukkit.optool
+      permission-message: You don't have <permission>
+   thanereload:
+      description: Reload the plugin
+      usage: §c/thanereload
+      permission: ThaneBukkit.reload
+      permission-message: You don't have <permission>
+   zombiebuy:
+      description: Buy an item from the shop.
+      usage: §c/zombiebuy <item|enchantment> <player>
+      permission: ThaneBukkit.zombiebuy
       permission-message: You don't have <permission>

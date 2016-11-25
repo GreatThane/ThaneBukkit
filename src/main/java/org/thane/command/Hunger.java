@@ -1,6 +1,5 @@
 package org.thane.command;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -8,8 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.thane.ThaneBukkit;
 import org.thane.Utils;
 
 /**
