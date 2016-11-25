@@ -15,7 +15,7 @@ import static org.bukkit.Bukkit.getServer;
  */
 public class ZombieBuy {
 
-    public boolean handleCommand(CommandSender sender,String[] args) {
+    public static boolean handleCommand(CommandSender sender,String[] args) {
 
         //Validation
         if(args.length !=2) {
@@ -64,16 +64,21 @@ public class ZombieBuy {
                     break;
 
                 case "diamond_sword":
-                    if(currency >= 50 && slotEquals(player, 0, Material.DIAMOND_SWORD)) {
-                        getServer().dispatchCommand(getServer().getConsoleSender(), "replaceitem entity " + userName + " slot.hotbar.0 diamond_sword 1 0 {HideFlags:6,display:{Name:\"§bDiamond Sword\",Lore:[\"§7A force to\",\"§7be reckoned with!\"]},Unbreakable:1}");
-                        getServer().dispatchCommand(getServer().getConsoleSender(), "clear" + userName + "iron_sword 0 1");
-                        Utils.setCurrency(player, currency - 50);
-                    } else {
-                        sender.sendMessage(ChatColor.RED + "You don't have enough" + ChatColor.YELLOW + " §lMoney" + ChatColor.RED + "!");
+                    //Validation
+                    if(!slotEquals(player, 0, Material.IRON_SWORD)) {
+                        sender.sendMessage(ChatColor.RED + "Oops, you don't have an iron sword in your first slot");
+                        break;
                     }
+                    if(currency < 50) {
+                        sender.sendMessage(ChatColor.RED + "You don't have enough" + ChatColor.YELLOW + " §lMoney" + ChatColor.RED + "!");
+                        break;
+                    }
+                    getServer().dispatchCommand(getServer().getConsoleSender(), "replaceitem entity " + userName + " slot.hotbar.0 diamond_sword 1 0 {HideFlags:6,display:{Name:\"§bDiamond Sword\",Lore:[\"§7A force to\",\"§7be reckoned with!\"]},Unbreakable:1}");
+                    getServer().dispatchCommand(getServer().getConsoleSender(), "clear" + userName + "iron_sword 0 1");
+                    Utils.setCurrency(player, currency - 50);
                     break;
 
-                case "sharpeness":
+                case "sharpness":
                     ItemStack sword = player.getInventory().getItem(0);
                     if(sword.getEnchantments().isEmpty()) {
                         if(currency >= 10) {
@@ -550,7 +555,7 @@ public class ZombieBuy {
         return false;
     }
 
-    private boolean slotEquals(Player player, int slot, Material material) {
+    private static boolean slotEquals(Player player, int slot, Material material) {
 
         return player.getInventory().getItem(slot).getType().equals(material);
     }
