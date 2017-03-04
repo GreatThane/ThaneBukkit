@@ -1,7 +1,7 @@
 package org.thane.entities;
 
 import java.io.Serializable;
-
+import org.bukkit.plugin.Plugin;
 /**
  * Created by GreatThane on 9/2/16.
  */
@@ -15,6 +15,21 @@ public class HighScore implements Comparable<HighScore>, Serializable {
         this.seconds = seconds;
     }
 
+    public void serialize(Plugin plugin) {
+        if(!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+        }
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(plugin.getDataFolder(),userName + ".ser"));
+            ObjectOutputStream outputStream = new ObjectOutputStream(fileOutputStream);
+            outputStream.writeObject(this);
+            fileOutputStream.close();
+            outputStream.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public int getSeconds() {
         return seconds;
     }
