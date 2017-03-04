@@ -24,11 +24,15 @@ public class ThaneBukkit extends JavaPlugin {
         getLogger().info("ThaneBukkit has been enabled");
         this.getServer().getPluginManager().registerEvents(new ArmorStandClick(), this);
         this.getServer().getPluginManager().registerEvents(new Hunger(), this);
+        if(!plugin().getDataFolder().exists()) {
+            plugin().getDataFolder().mkdirs();
+        }
     }
 
     @Override
     public void onDisable() {
         getLogger().info("ThaneBukkit has been disabled");
+        Bukkit.getScheduler.cancelTasks(this);
     }
 
     @Override
