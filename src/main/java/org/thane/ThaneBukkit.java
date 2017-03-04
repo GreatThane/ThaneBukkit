@@ -13,7 +13,6 @@ import org.thane.command.*;
 
 public class ThaneBukkit extends JavaPlugin {
 
-
     public static Plugin plugin() {
 
         return ThaneBukkit.getPlugin(ThaneBukkit.class);
@@ -32,7 +31,7 @@ public class ThaneBukkit extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("ThaneBukkit has been disabled");
-        Bukkit.getScheduler.cancelTasks(this);
+        Bukkit.getScheduler().cancelTasks(this);
     }
 
     @Override
@@ -47,7 +46,7 @@ public class ThaneBukkit extends JavaPlugin {
         }
         else if (command.getName().equalsIgnoreCase("survivorminer")) {
 
-            return new Zombies().handleCommand(sender, args);
+            return new Zombies().handleCommand(sender, args, this);
         }
         else if (command.getName().equalsIgnoreCase("animate")) {
 

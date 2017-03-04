@@ -2,6 +2,7 @@ package org.thane;
 
 import org.junit.Test;
 import org.thane.entities.HighScore;
+import org.thane.enums.Direction;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,6 +43,14 @@ public class UtilsTest {
         assertTrue(values[1].getSeconds() == 42);
         assertTrue(values[2].getSeconds() == 43);
         assertTrue(values[3].getSeconds() == 100);
+    }
+
+    @Test
+    public void testDirection() throws Exception {
+
+        String directionString = "south";
+        Direction direction = Direction.valueOf(directionString.toUpperCase());
+        assertEquals(direction, Direction.SOUTH);
     }
 
 }

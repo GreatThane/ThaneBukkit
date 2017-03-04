@@ -1,5 +1,8 @@
 package org.thane.entities;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import org.bukkit.plugin.Plugin;
 /**

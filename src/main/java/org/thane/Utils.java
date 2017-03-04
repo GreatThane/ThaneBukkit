@@ -2,6 +2,9 @@ package org.thane;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -141,5 +144,20 @@ public class Utils {
 
     public static void log(String message) {
         Bukkit.getLogger().info(message);
+    }
+
+    public static World getWorld(CommandSender sender) {
+
+        return getLocation(sender).getWorld();
+    }
+
+    public static Location getLocation(CommandSender sender) {
+
+        if (sender instanceof Player) {
+            return ((Player)sender).getLocation();
+        } else if (sender instanceof Block) {
+            return ((Block)sender).getLocation();
+        }
+        throw new RuntimeException("Unable to determine World of CommandSender");
     }
 }
