@@ -33,6 +33,7 @@ public class Zombies  {
             return false;
         }
 
+
         String command = args[0];
         switch (command) {
             case "start":
