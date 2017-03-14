@@ -5,14 +5,18 @@ package org.thane;
  */
 
 import org.bukkit.Bukkit;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.thane.command.*;
+import org.thane.entities.*;
 
 public class ThaneBukkit extends JavaPlugin {
 
+    public static List<HighScore> highScores = new ArrayList<>();
+    
     public static Plugin plugin() {
 
         return ThaneBukkit.getPlugin(ThaneBukkit.class);
@@ -23,6 +27,21 @@ public class ThaneBukkit extends JavaPlugin {
         getLogger().info("ThaneBukkit has been enabled");
         this.getServer().getPluginManager().registerEvents(new ArmorStandClick(), this);
         this.getServer().getPluginManager().registerEvents(new Hunger(), this);
+        getCommand("highscore").setExecutor((sender,command,cmdLabel, args) -> {
+            if(sender instanceof Player) {
+                Player player = (Player) sender;
+                for(HighScore highscore : highScores) {
+                    if(highscore.getUserName().equalsIgnoreCase(player.getName())) {
+                        player.sendMessage(ChatColor.GREEN + "Your highscore is " + highscore.getSeconds() +"!");
+                        return true;
+                    } else {
+                        player.sendMessage(ChatColor.RED + "No highscore was found!");
+                        return false;
+                    }
+                }
+            }
+            return false;
+        });
         if(!plugin().getDataFolder().exists()) {
             plugin().getDataFolder().mkdirs();
         }
@@ -64,8 +83,4 @@ public class ThaneBukkit extends JavaPlugin {
         }
         return false;
     }
-
-
-
-
 }
