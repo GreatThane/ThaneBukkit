@@ -1,5 +1,6 @@
 package org.thane.command;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -29,7 +30,7 @@ public class Hunger implements Listener {
         try {
             hungerValue = Integer.parseInt(args[1]);
             if (hungerValue < 0 || hungerValue > 20) {
-                sender.sendMessage("§cOops, hunger value should be between 0 and 20");
+                sender.sendMessage(ChatColor.RED + "Oops, hunger value should be between 0 and 20");
                 return false;
             }
         } catch (NumberFormatException ex) {

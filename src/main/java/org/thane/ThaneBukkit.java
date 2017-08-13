@@ -44,6 +44,10 @@ public class ThaneBukkit extends JavaPlugin {
 
             return new ThaneTimer().handleCommand(sender, args);
         }
+        else if (command.getName().equalsIgnoreCase("pvp")) {
+
+            return new PlayerVsParkour().handleCommand(sender, args, this);
+        }
         else if (command.getName().equalsIgnoreCase("survivorminer")) {
 
             return new Zombies().handleCommand(sender, args, this);

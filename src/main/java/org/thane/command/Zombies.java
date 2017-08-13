@@ -17,10 +17,8 @@ import org.thane.Utils;
 import org.thane.enums.Direction;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import static sun.audio.AudioPlayer.player;
 
 /**
  * Created by GreatThane on 9/17/16.

@@ -76,6 +76,10 @@ public class Animation {
 
         final World world = Utils.getWorld(sender);
 
+        //millis definition
+
+        long millis = (long) (1000 / fps);
+
         new BukkitRunnable() {
 
             @Override
@@ -114,6 +118,7 @@ public class Animation {
                         for (double sourceZ = currentReferenceZ1; zDone == false; sourceZ = sourceZ + (currentReferenceZ1 <= currentReferenceZ2 ? 1 : -1)) {
 
                             boolean xDone = false;
+
                             for (double sourceX = currentReferenceX1; xDone == false; sourceX = sourceX + (currentReferenceX1 <= currentReferenceX2 ? 1 : -1)) {
 
                                 // get source block
@@ -166,16 +171,15 @@ public class Animation {
                         }
                     }
 
-                    long millis = (long) (1000 / fps);
-                    try {
-                        Thread.sleep(millis);
-                    } catch (InterruptedException ie) {
-
-                    }
+//                    try {
+//                        Thread.sleep(millis);
+//                    } catch (InterruptedException ie) {
+//
+//                    }
 
                 }
             }
-        }.runTask(plugin);
+        }.runTaskLater(plugin, millis);
                 //runTaskAsynchronously(plugin);
     }
 

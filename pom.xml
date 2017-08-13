@@ -29,6 +29,10 @@
             <id>sk89q-repo</id>
             <url>http://maven.sk89q.com/repo/</url>
         </repository>
+        <repository>
+            <id>Multiverse-Core</id>
+            <url>http://repo.onarandombox.com/content/repositories/multiverse/</url>
+        </repository>
     </repositories>
     <dependencies>
         <!--Spigot API-->
@@ -51,6 +55,11 @@
             <artifactId>craftbukkit</artifactId>
             <version>1.11.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>1.11.2-R0.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
