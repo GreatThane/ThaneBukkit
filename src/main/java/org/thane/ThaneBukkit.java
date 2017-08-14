@@ -8,15 +8,21 @@ import org.bukkit.Bukkit;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.thane.command.*;
 import org.thane.entities.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ThaneBukkit extends JavaPlugin {
 
-    public static List<HighScore> highScores = new ArrayList<>();
-    
     public static Plugin plugin() {
 
         return ThaneBukkit.getPlugin(ThaneBukkit.class);
@@ -27,21 +33,8 @@ public class ThaneBukkit extends JavaPlugin {
         getLogger().info("ThaneBukkit has been enabled");
         this.getServer().getPluginManager().registerEvents(new ArmorStandClick(), this);
         this.getServer().getPluginManager().registerEvents(new Hunger(), this);
-        getCommand("highscore").setExecutor((sender,command,cmdLabel, args) -> {
-            if(sender instanceof Player) {
-                Player player = (Player) sender;
-                for(HighScore highscore : highScores) {
-                    if(highscore.getUserName().equalsIgnoreCase(player.getName())) {
-                        player.sendMessage(ChatColor.GREEN + "Your highscore is " + highscore.getSeconds() +"!");
-                        return true;
-                    } else {
-                        player.sendMessage(ChatColor.RED + "No highscore was found!");
-                        return false;
-                    }
-                }
-            }
-            return false;
-        });
+        this.getServer().getPluginManager().registerEvents(new PlayerVsParkour(), this);
+
         if(!plugin().getDataFolder().exists()) {
             plugin().getDataFolder().mkdirs();
         }
@@ -51,6 +44,21 @@ public class ThaneBukkit extends JavaPlugin {
     public void onDisable() {
         getLogger().info("ThaneBukkit has been disabled");
         Bukkit.getScheduler().cancelTasks(this);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        World world = Bukkit.getWorld("world");
+        Location location = new Location(world, 172, 133, 197, 90, 0);
+        Player player = event.getPlayer();
+        player.getInventory().clear();
+        player.getActivePotionEffects().clear();
+        ItemStack itemStack = new ItemStack(Material.COMPASS);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
+        itemStack.setItemMeta(itemMeta);
+        player.getInventory().setItem(0, itemStack);
+        player.teleport(location);
     }
 
     @Override

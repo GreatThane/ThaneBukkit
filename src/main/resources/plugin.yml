@@ -39,3 +39,8 @@ commands:
       usage: §c/zombiebuy <item|enchantment> <player>
       permission: ThaneBukkit.zombiebuy
       permission-message: You don't have <permission>
+   pvp:
+      description: Begin or end a Player Vs Parkour game.
+      usage: §c/pvp <start|stop>
+      permission: ThaneBukkit.pvp
+      permission-message: You don't have <permission>
