@@ -44,3 +44,8 @@ commands:
       usage: §c/pvp <start|stop>
       permission: ThaneBukkit.pvp
       permission-message: You don't have <permission>
+   thaneworld:
+      description: Teleport to the desired world
+      usage: §c/thaneworld <world> <x> <y> <z> [<pitch> <yaw>]
+      permission: ThaneBukkit.world
+      permission: You don't have <permission>

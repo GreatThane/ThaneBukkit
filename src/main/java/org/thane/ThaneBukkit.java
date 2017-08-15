@@ -10,6 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -46,7 +47,7 @@ public class ThaneBukkit extends JavaPlugin {
         Bukkit.getScheduler().cancelTasks(this);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         World world = Bukkit.getWorld("world");
         Location location = new Location(world, 172, 133, 197, 90, 0);
@@ -92,6 +93,9 @@ public class ThaneBukkit extends JavaPlugin {
         }
         else if (command.getName().equalsIgnoreCase("zombiebuy")) {
             return ZombieBuy.handleCommand(sender, args);
+        }
+        else if (command.getName().equalsIgnoreCase("thaneworld")) {
+            return ThaneWorld.handleCommand(sender, args);
         }
         return false;
     }

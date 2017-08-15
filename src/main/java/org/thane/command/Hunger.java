@@ -51,7 +51,7 @@ public class Hunger implements Listener {
         return true;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onFoodLevelChange(final FoodLevelChangeEvent event) {
         //This stops food level from changing due to exhaustion and eating
         //HOWEVER. it doesn't stop food level from increasing due to saturation.  Run difficulty EASY or more.
