@@ -7,10 +7,12 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -23,6 +25,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.thane.ThaneBukkit;
+import org.thane.ThaneLocation;
 import org.thane.enums.Direction;
 
 import java.util.ArrayList;
@@ -33,6 +36,9 @@ public class PlayerVsParkour implements Listener {
     private static List<Player> currentPlayers = new ArrayList<>();
     private static int yLevel = 133;
     private static boolean gameRunning = true;
+    private static final World WORLD = Bukkit.getWorld("pvp");
+    private static final Location LOBBY = new Location(WORLD, 200, 3, 199, -90, 0);
+    private static final Location FLAG = new Location(WORLD, 666, 177, 210, -90, 90);
 
     public boolean handleCommand(CommandSender sender, String[] args, Plugin plugin) {
 
@@ -47,9 +53,8 @@ public class PlayerVsParkour implements Listener {
         if (action.equalsIgnoreCase("start")) {
             yLevel = 133;
             gameRunning = true;
-            World world = Bukkit.getWorld("pvp");
-            if (world.getPlayers().size() > 1) {
-                world.getBlockAt(207, 4, 199).setType(Material.AIR);
+            if (WORLD.getPlayers().size() > 1) {
+                WORLD.getBlockAt(207, 4, 199).setType(Material.AIR);
                 int timesDone = 0;
 
                 // ItemStacks to be applied to players later, instead of being recreated repeatedly in for loop
@@ -76,7 +81,7 @@ public class PlayerVsParkour implements Listener {
                 stickMeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ENCHANTS);
 
                 // Prevent player advantages by clearing inventories and effects
-                for (Player player : world.getPlayers()) {
+                for (Player player : WORLD.getPlayers()) {
                     player.setGameMode(GameMode.ADVENTURE);
                     player.getInventory().clear();
                     for (PotionEffect effect : player.getActivePotionEffects()) {
@@ -87,36 +92,35 @@ public class PlayerVsParkour implements Listener {
                     // Figure out which player goes to which spawnpoint
                     timesDone++;
                     if (timesDone == 1) {
-                        Location location = new Location(world, 666, 141, 191, 0, 0);
-                        player.teleport(location);
+                        Location location = new Location(WORLD, 666, 141, 191, 0, 0);
+                        ThaneLocation.teleport(player, location);
                         currentPlayers.add(player);
                     } else if (timesDone == 2) {
-                        Location location = new Location(world, 685, 141, 210, 90, 0);
-                        player.teleport(location);
+                        Location location = new Location(WORLD, 685, 141, 210, 90, 0);
+                        ThaneLocation.teleport(player, location);
                         currentPlayers.add(player);
                     } else if (timesDone == 3) {
-                        Location location = new Location(world, 666, 141, 229, 180, 0);
-                        player.teleport(location);
+                        Location location = new Location(WORLD, 666, 141, 229, 180, 0);
+                        ThaneLocation.teleport(player, location);
                         currentPlayers.add(player);
                     } else if (timesDone == 4) {
-                        Location location = new Location(world, 647, 141, 210, -90, 0);
-                        player.teleport(location);
+                        Location location = new Location(WORLD, 647, 141, 210, -90, 0);
+                        ThaneLocation.teleport(player, location);
                         currentPlayers.add(player);
                     } else if (timesDone > 4) {
-                        Location location = new Location(world, 666, 177, 210, -90, 90);
-                        player.teleport(location);
+                        ThaneLocation.teleport(player, FLAG);
                         player.setGameMode(GameMode.SPECTATOR);
                     }
                     // Set up player inventory and effects
 
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 10000, 0, true));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 10000, 0, true, false));
                     player.getInventory().setItemInOffHand(bow);
                     player.getInventory().setBoots(boots);
                     player.getInventory().setItem(9, arrow);
                     player.getInventory().setItem(0, stick);
                 }
                 for (int second = 1; second <= 6; second++) {
-                    countDown(world, second, plugin);
+                    countDown(WORLD, second, plugin);
                 }
                 // Begin rising lava effect
 
@@ -138,28 +142,25 @@ public class PlayerVsParkour implements Listener {
     // Player death detection
 
     @EventHandler
-    public static void onPlayerDeath(PlayerDeathEvent event) {
-        Player player = event.getEntity().getPlayer();
-        World world = player.getWorld();
-        Location spawn = new Location(world, 200, 3, 199, -90, 0);
-        ItemStack itemStack = new ItemStack(Material.COMPASS);
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
-        itemStack.setItemMeta(itemMeta);
-        Location location = new Location(world, 666, 177, 210, -90, 90);
-        if (currentPlayers.contains(player)) {
-            currentPlayers.remove(player);
+    public static void onEntityDamageEvent(EntityDamageEvent event) {
 
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (player.isDead() && currentPlayers.size() == 1) {
+        if (gameRunning &&
+                event.getEntity().getWorld().equals(WORLD) &&
+                event.getEntityType().equals(EntityType.PLAYER)) {
+            Player player = (Player) event.getEntity();
+            if (currentPlayers.contains(player)) {
+                double health = player.getHealth();
+                if (health - event.getFinalDamage() < 1) {
+                    //You're gonna die
+                    event.setCancelled(true);
+                    ItemStack itemStack = new ItemStack(Material.COMPASS);
+                    ItemMeta itemMeta = itemStack.getItemMeta();
+                    itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
+                    itemStack.setItemMeta(itemMeta);
+
+                    currentPlayers.remove(player);
+                    if (currentPlayers.size() == 1) {
                         player.setHealth(20);
-//                        player.getInventory().clear();
-//                        player.setGameMode(GameMode.ADVENTURE);
-//                        player.getInventory().setItem(0, itemStack);
-                        player.setFireTicks(0);
-//                        player.teleport(spawn);
                         Bukkit.getLogger().info("Last Player Teleported!");
                         for (PotionEffect effect : player.getActivePotionEffects()) {
                             player.removePotionEffect(effect.getType());
@@ -171,19 +172,18 @@ public class PlayerVsParkour implements Listener {
                             }
                         }.runTaskLater(ThaneBukkit.plugin(), 5);
 
-                    } else if (player.isDead() && currentPlayers.size() > 1 && gameRunning) {
+                    } else if (currentPlayers.size() > 1) {
                         player.setHealth(20);
                         player.getInventory().clear();
                         player.getInventory().setItem(0, itemStack);
                         player.setGameMode(GameMode.SPECTATOR);
-                        player.teleport(location);
-                        Bukkit.getLogger().info("Player Teleported!");
+                        ThaneLocation.teleport(player, FLAG);
                         for (PotionEffect effect : player.getActivePotionEffects()) {
                             player.removePotionEffect(effect.getType());
                         }
                     }
                 }
-            }.runTaskLater(ThaneBukkit.plugin(), 1);
+            }
         }
     }
 
@@ -243,7 +243,7 @@ public class PlayerVsParkour implements Listener {
                     }
                 }
             }
-        }.runTaskLater(plugin, second*20);
+        }.runTaskLater(plugin, second * 20);
     }
     // Actual rising lava
 
@@ -253,22 +253,22 @@ public class PlayerVsParkour implements Listener {
             public void run() {
                 if (currentPlayers.size() > 1) {
 
-                 World world = Bukkit.getWorld("pvp");
-                 Location loc1 = new Location(world, 688, yLevel, 188);
-                 Location loc2 = new Location(world, 644, yLevel, 232);
-                     for (int x = loc2.getBlockX(); x <= loc1.getBlockX(); x++) {
-                         for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
-                             if (world.getBlockAt(x, yLevel, z).getType().equals(Material.AIR)) {
-                                 world.getBlockAt(x, yLevel, z).setType(Material.STATIONARY_LAVA);
-                             }
-                         }
-                     }
-                 if (yLevel == 173) {
-                     cancel();
-                 }
-                 yLevel++;
+                    World world = Bukkit.getWorld("pvp");
+                    Location loc1 = new Location(world, 688, yLevel, 188);
+                    Location loc2 = new Location(world, 644, yLevel, 232);
+                    for (int x = loc2.getBlockX(); x <= loc1.getBlockX(); x++) {
+                        for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
+                            if (world.getBlockAt(x, yLevel, z).getType().equals(Material.AIR)) {
+                                world.getBlockAt(x, yLevel, z).setType(Material.STATIONARY_LAVA);
+                            }
+                        }
+                    }
+                    if (yLevel == 173) {
+                        cancel();
+                    }
+                    yLevel++;
                 } else {
-                   cancel();
+                    cancel();
                 }
             }
         }.runTaskTimer(plugin, 100, 200);
@@ -343,22 +343,17 @@ public class PlayerVsParkour implements Listener {
         } else {
             victoryMessage = ChatColor.YELLOW + "There is no winner!";
         }
-        gameRunning = false;
         currentPlayers.clear();
-        World world = Bukkit.getWorld("pvp");
-        Location spawn = new Location(world, 200, 3, 199, -90, 0);
-        world.getBlockAt(207, 4, 199).setType(Material.STONE_BUTTON);
-        Location location = new Location(world, 207, 4, 199);
-        createButton(location, BlockFace.WEST);
 
+        Location location;
         // Recreate doors
-        location = new Location(world, 666, 141, 193);
+        location = new Location(WORLD, 666, 141, 193);
         setDoor(Direction.NORTH, location);
-        location = new Location(world, 683, 141, 210);
+        location = new Location(WORLD, 683, 141, 210);
         setDoor(Direction.EAST, location);
-        location = new Location(world, 666, 141, 227);
+        location = new Location(WORLD, 666, 141, 227);
         setDoor(Direction.SOUTH, location);
-        location = new Location(world, 649, 141, 210);
+        location = new Location(WORLD, 649, 141, 210);
         setDoor(Direction.WEST, location);
 
         ItemStack itemStack = new ItemStack(Material.COMPASS);
@@ -366,43 +361,83 @@ public class PlayerVsParkour implements Listener {
         itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
         itemStack.setItemMeta(itemMeta);
 
-        for (Player player : world.getPlayers()) {
+        int delay = 1;
 
-            player.getInventory().clear();
-            player.teleport(spawn);
-            player.setGameMode(GameMode.ADVENTURE);
-            player.setHealth(20);
-            player.getInventory().setItem(0, itemStack);
-            player.sendMessage(victoryMessage);
-            player.setFireTicks(0);
+        for (Player player : WORLD.getPlayers()) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
 
-            for (PotionEffect effect : player.getActivePotionEffects()) {
-                player.removePotionEffect(effect.getType());
-            }
+                    ThaneLocation.teleport(player, LOBBY);
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            player.getInventory().clear();
+                            player.setGameMode(GameMode.ADVENTURE);
+                            player.setFireTicks(0);
+                            player.setHealth(20);
+                            player.getInventory().setItem(0, itemStack);
+                            player.sendMessage(victoryMessage);
+                            for (PotionEffect effect : player.getActivePotionEffects()) {
+                                player.removePotionEffect(effect.getType());
+                            }
+                        }
+                    }.runTaskLater(ThaneBukkit.plugin(), 5);
+                }
+            }.runTaskLater(ThaneBukkit.plugin(), delay);
+
+            delay += 2;
         }
-        // Find and delete all remaining lava and barriers left over in the map
-        Location loc1 = new Location(world, 688, yLevel, 188);
-        Location loc2 = new Location(world, 644, yLevel - 4, 232);
-        for (int y = loc2.getBlockY(); y <= loc1.getBlockY(); y++) {
-            for (int x = loc2.getBlockX(); x <= loc1.getBlockX(); x++) {
-                for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
-                    if (world.getBlockAt(x, y, z).getType().equals(Material.NETHERRACK)
-                            || world.getBlockAt(x, y, z).getType().equals(Material.STATIONARY_LAVA)
-                            || world.getBlockAt(x, y, z).getType().equals(Material.LAVA)) {
-                        world.getBlockAt(x, y, z).setType(Material.AIR);
+
+        new BukkitRunnable() {
+            @Override
+            public void run () {
+                // Find and delete all remaining lava and barriers left over in the map
+                Location loc1 = new Location(WORLD, 688, yLevel, 188);
+                Location loc2 = new Location(WORLD, 644, yLevel - 4, 232);
+                int delay = 1;
+                for (int y = loc2.getBlockY(); y <= loc1.getBlockY(); y++) {
+                    for (int x = loc2.getBlockX(); x <= loc1.getBlockX(); x++) {
+                        clearLava(x, y, loc1, loc2, delay);
+                        delay++;
                     }
                 }
             }
-        }
-    }
-    // Method used to clear door areas
+        }.runTaskLater(ThaneBukkit.plugin(), 20);
 
+    }
+
+    private static void clearLava(int x, int y, Location loc1, Location loc2, int delay) {
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+
+                for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
+                    if (WORLD.getBlockAt(x, y, z).getType().equals(Material.NETHERRACK)
+                            || WORLD.getBlockAt(x, y, z).getType().equals(Material.STATIONARY_LAVA)
+                            || WORLD.getBlockAt(x, y, z).getType().equals(Material.LAVA)) {
+                        WORLD.getBlockAt(x, y, z).setType(Material.AIR);
+                    }
+                }
+                if(x == loc1.getBlockX() && y == loc1.getBlockY()) {
+                    WORLD.getBlockAt(207, 4, 199).setType(Material.STONE_BUTTON);
+                    Location location = new Location(WORLD, 207, 4, 199);
+                    createButton(location, BlockFace.WEST);
+
+                    gameRunning = false;
+                }
+            }
+        }.runTaskLater(ThaneBukkit.plugin(), delay);
+    }
+
+    // Method used to clear door areas
     private static void clearArea(Location loc1, Location loc2) {
         World world = loc1.getWorld();
         for (int y = loc1.getBlockY(); y <= loc2.getBlockY(); y++) {
             for (int x = loc1.getBlockX(); x <= loc2.getBlockX(); x++) {
                 for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
-                        world.getBlockAt(x, y, z).setType(Material.AIR);
+                    world.getBlockAt(x, y, z).setType(Material.AIR);
                 }
             }
         }
@@ -445,7 +480,7 @@ public class PlayerVsParkour implements Listener {
                 createButton(loc, BlockFace.NORTH);
             }
             for (int timesDone = 1; timesDone <= 3; timesDone++) {
-                loc = new Location( world, x + 1, y + timesDone, z - 1);
+                loc = new Location(world, x + 1, y + timesDone, z - 1);
                 createButton(loc, BlockFace.NORTH);
             }
 
@@ -474,7 +509,7 @@ public class PlayerVsParkour implements Listener {
                 createButton(loc, BlockFace.EAST);
             }
             for (int timesDone = 1; timesDone <= 3; timesDone++) {
-                loc = new Location( world, x + 1, y + timesDone, z + 1);
+                loc = new Location(world, x + 1, y + timesDone, z + 1);
                 createButton(loc, BlockFace.EAST);
             }
 
@@ -503,7 +538,7 @@ public class PlayerVsParkour implements Listener {
                 createButton(loc, BlockFace.SOUTH);
             }
             for (int timesDone = 1; timesDone <= 3; timesDone++) {
-                loc = new Location( world, x + 1, y + timesDone, z + 1);
+                loc = new Location(world, x + 1, y + timesDone, z + 1);
                 createButton(loc, BlockFace.SOUTH);
             }
 
@@ -546,7 +581,7 @@ public class PlayerVsParkour implements Listener {
         sign.setLine(2, " ");
         sign.setLine(3, " ");
         sign.setLine(0, " ");
-        org.bukkit.material.Sign matSign =  new org.bukkit.material.Sign(Material.WALL_SIGN);
+        org.bukkit.material.Sign matSign = new org.bukkit.material.Sign(Material.WALL_SIGN);
         matSign.setFacingDirection(blockFace);
         sign.setData(matSign);
         sign.update();

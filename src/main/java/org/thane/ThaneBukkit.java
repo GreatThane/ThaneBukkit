@@ -49,8 +49,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        World world = Bukkit.getWorld("world");
-        Location location = new Location(world, 172, 133, 197, 90, 0);
+
         Player player = event.getPlayer();
         player.getInventory().clear();
         for (PotionEffect effect : player.getActivePotionEffects()) {
@@ -61,7 +60,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
         itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
         itemStack.setItemMeta(itemMeta);
         player.getInventory().setItem(0, itemStack);
-        player.teleport(location);
+        ThaneLocation.teleport(player, ThaneLocation.MAIN_LOBBY);
     }
 
     @Override
