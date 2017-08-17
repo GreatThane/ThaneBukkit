@@ -14,9 +14,9 @@ public class ThaneWorld {
             sender.sendMessage(ChatColor.RED + "Incorrect number of parameters!");
             return false;
         }
-        int x = Integer.parseInt(args[1]);
+        double x = Integer.parseInt(args[1]) + 0.5;
         int y = Integer.parseInt(args[2]);
-        int z = Integer.parseInt(args[3]);
+        double z = Integer.parseInt(args[3]) + 0.5;
         World world = Bukkit.getWorld(args[0]);
         if (!(sender instanceof Player)) {
             return false;

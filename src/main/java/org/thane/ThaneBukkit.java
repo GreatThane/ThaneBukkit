@@ -11,18 +11,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 import org.thane.command.*;
-import org.thane.entities.*;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ThaneBukkit extends JavaPlugin implements Listener {
 
-public class ThaneBukkit extends JavaPlugin {
 
     public static Plugin plugin() {
 
@@ -32,6 +31,7 @@ public class ThaneBukkit extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("ThaneBukkit has been enabled");
+        this.getServer().getPluginManager().registerEvents(this, this);
         this.getServer().getPluginManager().registerEvents(new ArmorStandClick(), this);
         this.getServer().getPluginManager().registerEvents(new Hunger(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerVsParkour(), this);
@@ -53,7 +53,9 @@ public class ThaneBukkit extends JavaPlugin {
         Location location = new Location(world, 172, 133, 197, 90, 0);
         Player player = event.getPlayer();
         player.getInventory().clear();
-        player.getActivePotionEffects().clear();
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            player.removePotionEffect(effect.getType());
+        }
         ItemStack itemStack = new ItemStack(Material.COMPASS);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");

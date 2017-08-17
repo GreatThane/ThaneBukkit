@@ -9,8 +9,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,6 +22,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.thane.ThaneBukkit;
 import org.thane.enums.Direction;
 
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ public class PlayerVsParkour implements Listener {
 
     private static List<Player> currentPlayers = new ArrayList<>();
     private static int yLevel = 133;
+    private static boolean gameRunning = true;
 
     public boolean handleCommand(CommandSender sender, String[] args, Plugin plugin) {
 
@@ -42,6 +46,7 @@ public class PlayerVsParkour implements Listener {
 
         if (action.equalsIgnoreCase("start")) {
             yLevel = 133;
+            gameRunning = true;
             World world = Bukkit.getWorld("pvp");
             if (world.getPlayers().size() > 1) {
                 world.getBlockAt(207, 4, 199).setType(Material.AIR);
@@ -74,7 +79,9 @@ public class PlayerVsParkour implements Listener {
                 for (Player player : world.getPlayers()) {
                     player.setGameMode(GameMode.ADVENTURE);
                     player.getInventory().clear();
-                    player.getActivePotionEffects().clear();
+                    for (PotionEffect effect : player.getActivePotionEffects()) {
+                        player.removePotionEffect(effect.getType());
+                    }
                     player.sendMessage(ChatColor.YELLOW + "Beginning in:");
 
                     // Figure out which player goes to which spawnpoint
@@ -131,36 +138,64 @@ public class PlayerVsParkour implements Listener {
     // Player death detection
 
     @EventHandler
-    public static void onPlayerDeath(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
+    public static void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity().getPlayer();
         World world = player.getWorld();
-        if (currentPlayers.contains(player) && world.getName().equalsIgnoreCase("pvp")) {
-            Location location = new Location(event.getPlayer().getWorld(), 666, 177, 210, -90, 90);
-            player.setGameMode(GameMode.SPECTATOR);
-            player.getInventory().clear();
+        Location spawn = new Location(world, 200, 3, 199, -90, 0);
+        ItemStack itemStack = new ItemStack(Material.COMPASS);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
+        itemStack.setItemMeta(itemMeta);
+        Location location = new Location(world, 666, 177, 210, -90, 90);
+        if (currentPlayers.contains(player)) {
             currentPlayers.remove(player);
-            player.teleport(location);
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (player.isDead() && currentPlayers.size() == 1) {
+                        player.setHealth(20);
+//                        player.getInventory().clear();
+//                        player.setGameMode(GameMode.ADVENTURE);
+//                        player.getInventory().setItem(0, itemStack);
+                        player.setFireTicks(0);
+//                        player.teleport(spawn);
+                        Bukkit.getLogger().info("Last Player Teleported!");
+                        for (PotionEffect effect : player.getActivePotionEffects()) {
+                            player.removePotionEffect(effect.getType());
+                        }
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                endGame();
+                            }
+                        }.runTaskLater(ThaneBukkit.plugin(), 5);
+
+                    } else if (player.isDead() && currentPlayers.size() > 1 && gameRunning) {
+                        player.setHealth(20);
+                        player.getInventory().clear();
+                        player.getInventory().setItem(0, itemStack);
+                        player.setGameMode(GameMode.SPECTATOR);
+                        player.teleport(location);
+                        Bukkit.getLogger().info("Player Teleported!");
+                        for (PotionEffect effect : player.getActivePotionEffects()) {
+                            player.removePotionEffect(effect.getType());
+                        }
+                    }
+                }
+            }.runTaskLater(ThaneBukkit.plugin(), 1);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public static void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (currentPlayers.contains(player)) {
+            currentPlayers.remove(player);
             if (currentPlayers.size() == 1) {
-                Player winner = currentPlayers.get(0);
-                ItemStack itemStack = new ItemStack(Material.COMPASS);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
-                itemStack.setItemMeta(itemMeta);
                 endGame();
-                player.sendMessage(ChatColor.YELLOW + "The winner is " + ChatColor.GOLD + ChatColor.BOLD + winner.getName() + ChatColor.RESET + ChatColor.YELLOW + "!");
-                Location spawn = new Location(world, 200, 3, 199, -90, 0);
-                player.getInventory().clear();
-                player.getActivePotionEffects().clear();
-                player.teleport(spawn);
-                player.setGameMode(GameMode.ADVENTURE);
-                player.setHealth(20);
-                player.getInventory().setItem(0, itemStack);
-                player.setFireTicks(0);
-            } else {
-                player.teleport(location);
             }
         }
-
     }
     // Countdown from 1 to 5 before beginning the game
 
@@ -254,7 +289,7 @@ public class PlayerVsParkour implements Listener {
                             for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
                                 if (world.getBlockAt(x, yLevel - 3, z).getType().equals(Material.STATIONARY_LAVA)
                                         || world.getBlockAt(x, yLevel - 3, z).getType().equals(Material.LAVA)) {
-                                    world.getBlockAt(x, yLevel - 3, z).setType(Material.BARRIER);
+                                    world.getBlockAt(x, yLevel - 3, z).setType(Material.NETHERRACK);
                                 }
                             }
                         }
@@ -283,7 +318,7 @@ public class PlayerVsParkour implements Listener {
                         Location loc2 = new Location(world, 644, yLevel - 4, 232);
                         for (int x = loc2.getBlockX(); x <= loc1.getBlockX(); x++) {
                             for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
-                                if (world.getBlockAt(x, yLevel - 4, z).getType().equals(Material.BARRIER)) {
+                                if (world.getBlockAt(x, yLevel - 4, z).getType().equals(Material.NETHERRACK)) {
                                     world.getBlockAt(x, yLevel - 4, z).setType(Material.AIR);
                                 }
                             }
@@ -308,6 +343,7 @@ public class PlayerVsParkour implements Listener {
         } else {
             victoryMessage = ChatColor.YELLOW + "There is no winner!";
         }
+        gameRunning = false;
         currentPlayers.clear();
         World world = Bukkit.getWorld("pvp");
         Location spawn = new Location(world, 200, 3, 199, -90, 0);
@@ -331,23 +367,26 @@ public class PlayerVsParkour implements Listener {
         itemStack.setItemMeta(itemMeta);
 
         for (Player player : world.getPlayers()) {
-            player.getInventory().clear();
 
+            player.getInventory().clear();
             player.teleport(spawn);
             player.setGameMode(GameMode.ADVENTURE);
             player.setHealth(20);
-            player.getActivePotionEffects().clear();
             player.getInventory().setItem(0, itemStack);
             player.sendMessage(victoryMessage);
             player.setFireTicks(0);
+
+            for (PotionEffect effect : player.getActivePotionEffects()) {
+                player.removePotionEffect(effect.getType());
+            }
         }
         // Find and delete all remaining lava and barriers left over in the map
-        Location loc1 = new Location(world, 688, yLevel++, 188);
+        Location loc1 = new Location(world, 688, yLevel, 188);
         Location loc2 = new Location(world, 644, yLevel - 4, 232);
         for (int y = loc2.getBlockY(); y <= loc1.getBlockY(); y++) {
             for (int x = loc2.getBlockX(); x <= loc1.getBlockX(); x++) {
                 for (int z = loc1.getBlockZ(); z <= loc2.getBlockZ(); z++) {
-                    if (world.getBlockAt(x, y, z).getType().equals(Material.BARRIER)
+                    if (world.getBlockAt(x, y, z).getType().equals(Material.NETHERRACK)
                             || world.getBlockAt(x, y, z).getType().equals(Material.STATIONARY_LAVA)
                             || world.getBlockAt(x, y, z).getType().equals(Material.LAVA)) {
                         world.getBlockAt(x, y, z).setType(Material.AIR);
