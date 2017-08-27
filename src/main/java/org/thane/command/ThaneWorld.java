@@ -28,15 +28,21 @@ public class ThaneWorld {
             int yaw = Integer.parseInt(args[5]);
             location = new Location(world, x, y, z, pitch, yaw);
         }
+        teleportWorld(player, location);
+        return true;
+    }
+
+    public static void teleportWorld(Player player, Location location) {
         ItemStack itemStack = new ItemStack(Material.COMPASS);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.YELLOW + "Game Selector");
         itemStack.setItemMeta(itemMeta);
         player.setFireTicks(0);
+        player.setGameMode(GameMode.ADVENTURE);
         player.getInventory().clear();
         player.getActivePotionEffects().clear();
         player.getInventory().setItem(0, itemStack);
         player.teleport(location);
-        return true;
+        player.setGameMode(GameMode.ADVENTURE);
     }
 }

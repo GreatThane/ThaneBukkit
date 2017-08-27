@@ -112,7 +112,7 @@ public class PlayerVsParkour implements Listener {
                     }
                     // Set up player inventory and effects
 
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 10000, 0, true, false));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100000, 0, false, false));
                     player.getInventory().setItemInOffHand(bow);
                     player.getInventory().setBoots(boots);
                     player.getInventory().setItem(9, arrow);
@@ -133,10 +133,12 @@ public class PlayerVsParkour implements Listener {
 
         } else if (action.equalsIgnoreCase("stop")) {
             endGame();
+            return true;
         } else {
             author.sendMessage(ChatColor.RED + "This is not a parameter!");
+            return false;
         }
-        return false;
+        return true;
     }
     // Player death detection
 
@@ -395,7 +397,7 @@ public class PlayerVsParkour implements Listener {
                 Location loc1 = new Location(WORLD, 688, yLevel, 188);
                 Location loc2 = new Location(WORLD, 644, yLevel - 4, 232);
                 int delay = 1;
-                for (int y = loc2.getBlockY(); y <= loc1.getBlockY(); y++) {
+                for (int y = loc1.getBlockY(); y <= loc2.getBlockY(); y--) {
                     for (int x = loc2.getBlockX(); x <= loc1.getBlockX(); x++) {
                         clearLava(x, y, loc1, loc2, delay);
                         delay++;
@@ -403,7 +405,6 @@ public class PlayerVsParkour implements Listener {
                 }
             }
         }.runTaskLater(ThaneBukkit.plugin(), 20);
-
     }
 
     private static void clearLava(int x, int y, Location loc1, Location loc2, int delay) {

@@ -1,8 +1,12 @@
 package org.thane.command;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.thane.Utils;
 
 /**
@@ -14,7 +18,6 @@ public class OpTools {
 
         String commandType = args[0];
         Player player = (Player) sender;
-        String userName = player.getName();
         switch (commandType.toLowerCase()) {
             case "setcurrency":
                 if(args.length < 2) {
@@ -28,6 +31,20 @@ public class OpTools {
 
             case "showcurrency":
                 sender.sendMessage(ChatColor.YELLOW + "You have " + Utils.getCurrency(player));
+                break;
+
+            case "settings":
+                for (Player player1 : player.getWorld().getPlayers()) {
+                    if (player1.getInventory().contains(Material.BLAZE_ROD)) {
+                        player1.getInventory().remove(Material.BLAZE_ROD);
+                    }
+                }
+                ItemStack itemStack = new ItemStack(Material.BLAZE_ROD);
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                if (player.getWorld().equals(Bukkit.getServer().getWorld("arena"))) {
+                    itemMeta.setDisplayName(ChatColor.GOLD + "Arena Settings");
+                }
+                player.getInventory().setItem(4, itemStack);
                 break;
 
             default:

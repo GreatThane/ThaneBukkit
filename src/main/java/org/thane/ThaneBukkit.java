@@ -8,17 +8,24 @@ import org.bukkit.Bukkit;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.thane.command.*;
+import org.thane.enums.Menu;
 
 public class ThaneBukkit extends JavaPlugin implements Listener {
 
@@ -35,6 +42,8 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
         this.getServer().getPluginManager().registerEvents(new ArmorStandClick(), this);
         this.getServer().getPluginManager().registerEvents(new Hunger(), this);
         this.getServer().getPluginManager().registerEvents(new PlayerVsParkour(), this);
+        this.getServer().getPluginManager().registerEvents(new Arena(), this);
+        this.getServer().getPluginManager().registerEvents(new ThaneMenu(), this);
 
         if(!plugin().getDataFolder().exists()) {
             plugin().getDataFolder().mkdirs();
@@ -85,7 +94,7 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
 
             return new Animation().handleCommand(sender, args, this);
         }
-        else if (command.getName().equalsIgnoreCase("optool")) {
+        else if (command.getName().equalsIgnoreCase("o")) {
             return OpTools.handleCommand(sender, args);
         }
         else if (command.getName().equalsIgnoreCase("thanereload")) {
@@ -97,6 +106,9 @@ public class ThaneBukkit extends JavaPlugin implements Listener {
         }
         else if (command.getName().equalsIgnoreCase("thaneworld")) {
             return ThaneWorld.handleCommand(sender, args);
+        }
+        else if (command.getName().equalsIgnoreCase("arena")) {
+            return Arena.handleCommand(sender, args);
         }
         return false;
     }
